@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>The Song We Hid From the Rain</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:ital@1&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+color:white;
+font-family:'Lora',serif;
+overflow-x:hidden;
+position:relative;
+}
+
+/* ===== Background Video ===== */
+
+#bgVideo{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-2;
+}
+
+body::after{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.55);
+z-index:-1;
+}
+
+/* ===== Hero Section ===== */
+
+section{
+min-height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:40px;
+}
+
+.btn{
+padding:12px 25px;
+margin:10px;
+background:#f3c96a;
+border:none;
+cursor:pointer;
+font-family:'Montserrat';
+transition:0.3s;
+}
+
+.btn:hover{
+background:white;
+color:#1c2a3a;
+}
+
+/* ===== Story Section ===== */
+
+#storySection{
+display:none;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:60px 20px;
+position:relative;
+overflow:hidden;
+}
+
+.story-content{
+max-width:900px;
+transition:all 0.6s ease;
+}
+
+.slide-in{
+opacity:1;
+transform:translateX(0);
+}
+
+.slide-out-left{
+opacity:0;
+transform:translateX(-100px);
+}
+
+.slide-out-right{
+opacity:0;
+transform:translateX(100px);
+}
+
+#songNumber{
+font-family:'Playfair Display',serif;
+font-size:3rem;
+font-weight:700;
+margin-bottom:15px;
+}
+
+#songTopic{
+font-family:'Playfair Display',serif;
+font-size:1.6rem;
+font-weight:700;
+margin-bottom:35px;
+}
+
+#songContent{
+line-height:2;
+font-size:1.1rem;
+font-style:italic;
+white-space:pre-line;
+max-width:900px;
+}
+
+/* ===== Buttons ===== */
+
+#nextBtn{
+position:fixed;
+bottom:30px;
+right:30px;
+display:none;
+}
+
+#prevBtn{
+position:fixed;
+bottom:30px;
+left:30px;
+display:none;
+}
+
+#homeBtn{
+position:fixed;
+top:30px;
+left:30px;
+display:none;
+}
+
+/* ===== Rain Canvas ===== */
+
+canvas{
+position:fixed;
+top:0;
+left:0;
+pointer-events:none;
+z-index:1;
+}
+
+.water-drop{
+position:fixed;
+top:-20px;
+width:8px;
+height:8px;
+background:radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.2) 70%);
+border-radius:50%;
+pointer-events:none;
+animation:dropFall linear forwards;
+z-index:2;
+}
+
+@keyframes dropFall{
+to{
+transform:translateY(110vh);
+opacity:0;
+}
+}
+
+</style>
+</head>
+
+<body>
+
+<video autoplay muted loop playsinline id="bgVideo">
+  <source src="assets/misty-hill.mp4" type="video/mp4">
+</video>
+
+<canvas id="rainCanvas"></canvas>
+
+<audio id="bgMusic" autoplay loop>
+  <source src="assets/piano.mp3" type="audio/mpeg">
+</audio>
+
+<section id="heroSection">
+<h1 style="font-family:'Playfair Display'; font-size:3rem;">Some songs are not heard… they are felt.</h1>
+<button class="btn" onclick="startStory()">Enter the Story</button>
+</section>
+
+<section id="storySection">
+
+<div id="storyContent" class="story-content slide-in">
+<div id="songNumber"></div>
+<div id="songTopic"></div>
+<div id="songContent"></div>
+</div>
+
+<button id="prevBtn" class="btn" onclick="prevStory()">← Previous</button>
+<button id="nextBtn" class="btn" onclick="nextStory()">Next Story →</button>
+<button id="homeBtn" class="btn" onclick="goHome()">Home</button>
+
+</section>
+
+<script>
+
+let currentSong = 0;
+
+let songs = [
+{
+number:"Song 1",
+topic:"The Hill Where Voices Echoed",
+content:`The camp perched high in the emerald hills, a cluster of wooden cabins and open stages surrounded by ancient pine trees that whispered secrets to the mist. Every evening, that mist rolled in like a slow, silent dream, blurring the line between the real and the imagined. Students from distant cities had flocked here for a month of music, each carrying their own burdens: some chased fame like a fleeting shadow, others sought escape from broken homes, and a few, like Meera, simply yearned to find the pieces of themselves they'd lost along the way. Meera was 18, with eyes that held the weight of unspoken fears and a voice that could shatter glass—or heal a wounded soul—if only she dared to unleash it. Her parents had pushed her into singing lessons as a child, dreaming of a star, but the spotlight felt like a cage. Stage fright gripped her like a vice; the moment eyes turned her way, her throat tightened, her hands trembled, and the world shrank to a pinpoint of panic. Tia, her best friend since they were kids sharing crayons and dreams, had only one mission: to drag Meera into the light. Tia was all fire and laughter, a guitarist whose strums could make the sun rise. "You didn't come here to hide behind these trees," Tia said, tugging Meera toward the registration desk. Her voice was firm but kind, like a sister who knew the pain of hiding. "This camp is your restart. Feel the air? It's alive with possibility." Meera sighed, her stomach twisting. "I feel like fainting already. What if I freeze up there?" "Good," Tia grinned, her eyes sparkling. "That means something real is about to happen. Fear is just the door walk through it." As they signed in, Meera glanced at the hills. They seemed to hum with a quiet energy, as if the earth itself remembered old songs. Little did she know, those hills held echoes of her own family's past—a grandmother who had sung folk tunes here decades ago, before a storm claimed her life. But that secret was buried deep, waiting.`
+},
+{
+number:"Song 2",
+topic:"The Boy Who Never Looked Fully Happy",
+content:`They met Adil on the first evening, as the sun dipped low and painted the sky in bruised purples. He sat near the rehearsal stage, fiddling with a battered drum set that looked like it had stories etched into its skin. When he began playing, the rhythm exploded—deep, primal beats that made the ground pulse beneath their feet. Even the birds fell silent, as if in awe. His hands moved with a fury that spoke of buried pain, each strike a cry for release. The crowd erupted in applause when he finished, but Adil's smile was polite, distant—like a mask hiding a storm. His eyes, dark and stormy, scanned the faces but never truly connected. He was 19, with tousled hair and a quiet intensity that drew people in, yet pushed them away. Tia whispered to Meera, "He's interesting. Like a puzzle you want to solve." Meera nodded, her voice almost a whisper. ‘He looks… like someone who has been strong for too long, and no one has ever asked if he is tired.' That was the first thing she noticed—the sadness that clung to him like the mist. And in that moment, something in Meera recognized it as her own.`
+},
+{
+number:"Song 3",
+topic:"The Camp of Small Changes",
+content:`Days unfolded in a rhythm of workshops, late-night jam sessions, and shared meals under the stars. The camp director, an old man with a beard like tangled vines, encouraged them to "feel the music, not just play it." Tia bulldozed Meera into group activities, forcing her to stand at the front sometimes, her voice a timid thread weaving into the chorus. Adil often accompanied singers on drums, his beats a steady heartbeat. One humid afternoon, during a quiet practice, Meera hummed a soft melody in the corner. Adil noticed immediately, his sticks pausing mid-air. "You sing well," he said, his voice low and genuine. "Like the hills are singing through you." Meera blushed, tucking her hair behind her ear. "I only sing when no one listens. It's safer that way." Adil smiled slightly, a rare warmth breaking through. "Then I'll pretend I'm not listening. Keep going." That was how their friendship sparked—softly, without fanfare. They talked about dreams: Meera's fear of the stage, Adil's longing to tour with a band. But beneath his words, Meera sensed shadows. He never spoke of his family, only hinting at "old wounds." Tia watched them with a knowing smile. "You're both hiding, but together, you might just find the light."`
+},
+{
+number:"Song 4",
+topic:"The First Mystery",
+content:`One night, Tia awoke to find Meera standing by the dormitory window, staring into the darkness. The moon cast eerie shadows on the hills. "You okay?" Tia asked, rubbing her eyes. "I heard drums," Meera whispered, her voice trembling. "Not from here. Far away, like from the forest. It sounded... alive, but sad." Tia frowned. "Practice? Or maybe the wind?" The next morning, the camp caretaker, a grizzled man named Ramu, mentioned it casually over breakfast. "Sometimes folks hear drums at night from the old stage near the forest. No one's used it since the accident. Says it's haunted by echoes." "Why haunted?" Tia pressed, intrigued. "A performer collapsed there years ago. Heart gave out mid-song. Folks say his spirit plays on, waiting for someone to finish the tune." Everyone laughed it off as a campfire tale, but Meera noticed Adil go still, his fork frozen in his hand. His eyes darkened, as if the words had struck a chord deep within him. That night, Meera lay awake, the distant thrum echoing in her mind. Was it real, or her imagination? The hills seemed to hold their breath, as if guarding secrets.`
+},
+{
+number:"Song 5",
+topic:"A Secret Past",
+content:`A few days later, Meera stumbled upon Adil arguing on his phone behind the rehearsal hall. His voice was sharp, urgent. "I said I don't want anyone here to know. Not yet. It's too soon." He spun around, spotting her, and forced a smile that didn't reach his eyes. "Family problem?" Meera asked gently, stepping closer. "Yeah," he replied too quickly, pocketing the phone. "Just... stuff from home. My dad's been calling, wanting me to give up music. Says it's a dead end." But Meera heard the lie in his tone—it felt heavier, like a boulder on his chest. She wanted to pry, but something held her back. Instead, she shared a piece of herself. "My parents pushed me to sing too. Said it was my 'gift.' But it feels like a curse sometimes." Adil nodded, his gaze softening. "Gifts can hurt if they're not yours to give." In that moment, a fragile trust formed, like the first thread of a melody.`
+},
+{
+number:"Song 6",
+topic:"The Promise of the Stage",
+content:`The camp director announced the grand finale: an open-air concert before the monsoon hit. Everyone had to perform, rain or shine. Tia's eyes lit up. "Meera, you're doing this. No backing out." Meera's heart raced. "Tia, please—" Adil, overhearing, spoke calmly. "I'll play drums for you. We can do it together." Meera looked at him, surprised. "Together? You barely know me." "Music knows us," he said, his voice steady. "Let me be your rhythm." For the first time, the stage didn't feel like a monster. It felt like a promise.`
+},
+{
+number:"Song 7",
+topic:"The Locked Room",
+content:`While exploring, Tia and Meera discovered an old storage room near the abandoned forest stage. The door creaked open, revealing dusty instruments and forgotten sheet music. On the wall hung a faded newspaper clipping: "Young Drummer Dies During Performance – Sudden Collapse on Stage." The date: five years ago. Below it, a photo of a boy who looked eerily like Adil—same eyes, same smile. Meera's heart skipped. "That can't be..." Tia whispered, "It's like looking at Adil's ghost." They left quickly, but the image haunted Meera. That night, she heard the drums again, louder, as if calling her.`
+},
+{
+number:"Song 8",
+topic:"The Truth Begins to Surface",
+content:`By the river that evening, Meera confronted Adil. The water rushed like a heartbeat, mirroring her own. "Were you here before? That photo... the drummer—" He stared at her, the truth cracking his facade. "Yes. That was my brother, Aarav. He collapsed during a concert. Heart condition, undiagnosed. I was supposed to join him that day, but I skipped—angry over a stupid fight. He died alone on that stage. I came back to perform there, to say sorry. Maybe find peace." Tears welled in his eyes. "But the guilt... it never leaves. I hear his drums sometimes, in my dreams. Like he's still waiting." Meera didn't speak. She just held his hand, letting the silence heal what words couldn't. In that moment, she felt her own buried pain stir—her grandmother's death in a similar storm, a family secret of lost melodies.`
+},
+{
+number:"Song 9",
+topic:"The Hidden Illness",
+content:`Later, while picking up his scattered papers, Meera noticed a medical report slipping from Adil’s bag, and as her eyes fell on the words “Severe cardiac condition — surgery urgently required,” the world around her seemed to fade into silence. The letters blurred through the sudden rush of tears, her hands trembling as fear tightened painfully in her chest. That evening, standing before him and struggling to steady her voice, she finally whispered, “Adil… tell me the truth… are you really sick?”—a fragile question carrying the quiet terror of a heart already afraid of losing someone it had just begun to hold close. He hesitated, then smiled weakly. "It's manageable. Don't worry." But she saw the fear in his eyes. "Adil, you can't carry this alone. Let me help. I want to be with you." He pulled her close, whispering in her ears, "You're already very close to my heart. Your voice... it drowns out the noise." Their bond deepened, a quiet love blooming amid the shadows.`
+},
+{
+number:"Song 10",
+topic:"Feelings That Arrived Quietly",
+content:`As the concert neared, Meera and Adil practiced endlessly. Their sessions were magic—her voice soaring with his beats, creating harmonies that felt alive. One night, Tia watched from afar, tears in her eyes. "They don't see it yet," she murmured. "How they're becoming each other's strength." Another camper asked, "What do you mean?" "That love isn't loud," Tia said. "It's the quiet beat that keeps you going." Meera felt it too a warmth that chased away her fears. Adil's touch lingered, his smiles real now.`
+},
+{
+number:"Song 11",
+topic:"The Night of the Hidden Performance",
+content:`Two nights before the concert, Meera followed the drums to the forest stage. Adil played alone, his face twisted in agony. "I come here for him," he admitted when she appeared. "Feels like Aarav is listening." Meera stepped onto the stage. "Then let me sing. For him. For us." They performed their final song together—a haunting melody woven with the ache of lost years and the fragile hope of second chances. As the last note trembled in the air and her voice slowly faded into silence, Adil stepped closer, his eyes shining with emotions he could no longer hide. He cupped her face gently, as if afraid she might disappear, and kissed her—soft, trembling, and filled with a desperate tenderness that spoke more than words ever could. Resting his forehead against hers, his voice barely a whisper, he said, “I love you, Meera… somehow, through you, I found the part of myself I thought I had lost forever. You didn’t just come into my life—you brought my heart back to me.” In the silence, they heard it: a faint echo, like Aarav's drums approving. Love had awakened something ancient.`
+},
+{
+number:"Song 12",
+topic:"The Sudden Disappearance",
+content:`The morning before the concert, Adil vanished. His phone went dead. Panic gripped Meera—stage fright paled compared to this fear. By evening, word came: he'd collapsed on the road, rushed to the hospital. His condition had worsened. Meera collapsed into Tia’s arms, her strength giving way as quiet sobs turned into uncontrollable tears, each breath trembling as if her heart could no longer hold the pain inside it. Clutching Tia tightly, as though letting go might make everything real, she whispered through broken breaths, “He promised… he promised we would stand on that stage together,” her voice cracking under the weight of a dream that now felt painfully unfinished. Tia held her. "He'd want you to sing for him."`
+},
+{
+number:"Song 13",
+topic:"The Performance Without Him",
+content:`The concert began under ominous clouds. Rain threatened, but Meera stepped out alone. Her voice trembled at first, then poured out—their song, filled with pain and love. People wept; the wind stilled. It was raw, heartbreaking, a testament to their bond. Afterward, Meera rushed to the hospital. Adil was weak but awake. "I heard you," he whispered. "You sang our hearts out." Tears streamed down her face as she clutched his hand, her voice trembling. “Please… don’t leave me.” He gave a faint, fragile smile and gently tightened his fingers around hers. “And if I ever have to,” he whispered softly, “promise me you’ll keep singing— not for me, but for yourself, for the dreams that were always yours.” Adil placed a small envelope in Meera’s hands, the paper faintly damp with tears. His fingers lingered before he softly said, “Open it only after my surgery,” leaving her holding the letter tightly, her heart already trembling with the words it might contain.`
+},
+{
+number:"Song 14",
+topic:"The Rain Finally Arrived",
+content:`The monsoon unleashed that night, torrents washing the hills. Adil was flown for surgery. He left a note: "Some songs end, but their echo lingers. You are mine." Meera returned home shattered, her voice silent for months. Tia stayed by her side, but grief was a storm. Meera opened the letter with trembling hands, and before she could finish reading, tears blurred her vision—each word carrying a love he had never fully spoken aloud. Each day, she waited for the moment Adil would return and wrap her in the tight hug she had been living for. She began counting the passing days by the falling leaves of the maple tree outside her window, as if time could be measured by how long her heart had been waiting. Nights brought no sleep—only the soft rustle of the letter she read again and again under the dim light. Every morning she quietly cleaned his drums, keeping them ready for the day he would play again, and when silence felt too heavy, she sang their favorite song "ABHI NA JAO CHOR KAR, K DIL ABHI BHARA NAHI", her trembling voice holding on to the hope that somewhere, somehow, he was still listening.`
+},
+{
+number:"Song 15",
+topic:"The Echoes That Lingered",
+content:`Years passed. Meera became a singer, her voice a balm for the broken. Each concert, she felt Adil's presence. Tia managed her career, still the spark. But every monsoon, Meera visited the camp, singing alone on the forest stage—a ritual of remembrance. A year later, as she stood lost in the quiet rhythm of life, the sudden sound of drums echoed behind her. Her heart skipped, and when she turned, time seemed to stop—there he was, Adil, standing a few steps away. He looked thinner, the months of struggle still visible in his face, yet his smile carried a warmth she had missed every single day. The surgery had saved him, though the long recovery had kept him hidden from the world. Through it all, he had searched for her, holding on to the hope that one day he would return—not broken, but strong enough to stand before her again. "You kept singing," he said. "You kept fighting," she replied. As rain fell, they embraced on the stage. The melody they'd hidden was now theirs to share. Love hadn't died—it had waited, like the hills' ancient song, for the rain to bring it back. But in the quiet, Meera knew: some echoes fade, but the heart's song endures, forever touched by the storm.`
+}
+];
+
+function startStory(){
+document.getElementById("heroSection").style.display="none";
+document.getElementById("storySection").style.display="flex";
+document.getElementById("nextBtn").style.display="block";
+document.getElementById("homeBtn").style.display="block";
+updateButtons();
+showSong("slide-in");
+}
+
+function showSong(animation){
+let container=document.getElementById("storyContent");
+container.className="story-content "+animation;
+
+document.getElementById("songNumber").innerText=songs[currentSong].number;
+document.getElementById("songTopic").innerText=songs[currentSong].topic;
+document.getElementById("songContent").innerText=songs[currentSong].content;
+}
+
+function nextStory(){
+if(currentSong<songs.length-1){
+animateChange("left",()=>{
+currentSong++;
+updateButtons();
+});
+}
+}
+
+function prevStory(){
+if(currentSong>0){
+animateChange("right",()=>{
+currentSong--;
+updateButtons();
+});
+}
+}
+
+function animateChange(direction,callback){
+let container=document.getElementById("storyContent");
+
+container.classList.remove("slide-in");
+
+if(direction==="left"){
+container.classList.add("slide-out-left");
+}else{
+container.classList.add("slide-out-right");
+}
+
+setTimeout(()=>{
+callback();
+container.className="story-content slide-in";
+showSong("slide-in");
+},500);
+}
+
+function updateButtons(){
+document.getElementById("prevBtn").style.display=currentSong>0?"block":"none";
+document.getElementById("nextBtn").innerText=currentSong===songs.length-1?"End Story":"Next Story →";
+}
+
+function goHome(){
+currentSong=0;
+document.getElementById("storySection").style.display="none";
+document.getElementById("heroSection").style.display="flex";
+document.getElementById("prevBtn").style.display="none";
+document.getElementById("nextBtn").style.display="none";
+document.getElementById("homeBtn").style.display="none";
+}
+
+/* Rain + Water Drops unchanged */
+
+const canvas=document.getElementById("rainCanvas");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let drops=[];
+for(let i=0;i<200;i++){
+drops.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+length:Math.random()*20,
+speed:Math.random()*4+2
+});
+}
+
+function drawRain(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.strokeStyle="rgba(255,255,255,0.3)";
+ctx.lineWidth=1;
+
+for(let d of drops){
+ctx.beginPath();
+ctx.moveTo(d.x,d.y);
+ctx.lineTo(d.x,d.y+d.length);
+ctx.stroke();
+d.y+=d.speed;
+if(d.y>canvas.height){d.y=0;}
+}
+requestAnimationFrame(drawRain);
+}
+
+drawRain();
+
+function createWaterDrop(){
+const drop=document.createElement("div");
+drop.classList.add("water-drop");
+drop.style.left=Math.random()*window.innerWidth+"px";
+drop.style.animationDuration=(3+Math.random()*3)+"s";
+document.body.appendChild(drop);
+setTimeout(()=>{drop.remove();},6000);
+}
+
+setInterval(createWaterDrop,400);
+
+</script>
+
+</body>
+</html>
